@@ -1267,14 +1267,200 @@ interface INonfungiblePositionManager is
     function burn(uint256 tokenId) external payable;
 }
 
+// contract PixpelSwap {
+//     address public owner;
+//     address private dexAddress = 0xA220f76426c390f15b06AC985140AABdbE6Fa02d;
+//     address private factory = 0xC58f2bC17D96C4fA3217FC58536E1629B249C9C4;
+//     address private positionManager =
+//         0xCf2B7E9E377B841532D52bfB00e3559e61B7B588;
+//     mapping(uint256 => address) public tokens;
+//     uint256 tokensLength = 0;
+
+//     modifier onlyOwner() {
+//         require(msg.sender == owner, "Owner only function!");
+//         _;
+//     }
+
+//     constructor(
+//         address _swapRouter,
+//         address _factory,
+//         address _positionManager
+//     ) {
+//         dexAddress = _swapRouter;
+//         owner = msg.sender;
+//         factory = _factory;
+//         positionManager = _positionManager;
+//     }
+
+//     function exactInput(ISwapRouter.ExactInputSingleParams memory _params)
+//         external
+//         payable
+//         returns (uint256 amountOut)
+//     {
+//         ISwapRouter dexContract = ISwapRouter(dexAddress);
+//         IERC20 tokenIn = IERC20(_params.tokenIn);
+
+//         // Ensure the contract has enough allowance to transfer the tokens
+//         require(
+//             tokenIn.allowance(msg.sender, address(this)) >= _params.amountIn,
+//             "Insufficient allowance"
+//         );
+
+//         // Transfer the tokens from the sender to the contract
+//         require(
+//             tokenIn.transferFrom(msg.sender, address(this), _params.amountIn),
+//             "Transfer failed"
+//         );
+
+//         uint256 swapFee = _params.amountIn / 100;
+//         uint256 amountToSwap = _params.amountIn - swapFee;
+
+//         // Approve the Uniswap router to spend the tokens
+//         require(tokenIn.approve(dexAddress, amountToSwap), "Approval failed");
+
+//         ISwapRouter.ExactInputSingleParams memory newParams = ISwapRouter
+//             .ExactInputSingleParams({
+//                 tokenIn: _params.tokenIn,
+//                 tokenOut: _params.tokenOut,
+//                 fee: _params.fee,
+//                 recipient: _params.recipient,
+//                 deadline: _params.deadline,
+//                 amountIn: amountToSwap,
+//                 amountOutMinimum: _params.amountOutMinimum,
+//                 sqrtPriceLimitX96: _params.sqrtPriceLimitX96
+//             });
+
+//         // Perform the swap
+//         amountOut = dexContract.exactInputSingle(newParams);
+
+//         // Ensure the contract does not retain any leftover tokens
+//         uint256 leftoverBalance = tokenIn.balanceOf(address(this));
+//         if (leftoverBalance > 0) {
+//             require(
+//                 tokenIn.transfer(msg.sender, leftoverBalance),
+//                 "Refund failed"
+//             );
+//         }
+//     }
+
+//     function createAndInitializePoolIfNecessary(
+//         address token0,
+//         address token1,
+//         uint24 fee,
+//         uint160 sqrtPriceX96
+//     ) public payable returns (address pool) {
+//         IUniswapV3Factory factoryContract = IUniswapV3Factory(factory);
+//         address existingPool = factoryContract.getPool(token0, token1, fee);
+
+//         if (existingPool == address(0)) {
+//             address newPool = factoryContract.createPool(token0, token1, fee);
+//             IUniswapV3Pool poolContract = IUniswapV3Pool(newPool);
+//             poolContract.initialize(sqrtPriceX96);
+//             pool = newPool;
+//         } else {
+//             pool = existingPool;
+//         }
+//     }
+
+//     function createLiquidity(
+//         INonfungiblePositionManager.MintParams memory params
+//     )
+//         public
+//         payable
+//         returns (
+//             uint256 tokenId,
+//             uint128 liquidity,
+//             uint256 amount0,
+//             uint256 amount1
+//         )
+//     {
+
+//         IERC20 token0 = IERC20(params.token0);
+//         IERC20 token1 = IERC20(params.token1);
+
+//         uint256 amount0Fee = params.amount0Desired / 100;
+//         uint256 amount1Fee = params.amount1Desired / 100;
+
+//         // Ensure the contract has enough allowance to transfer the tokens
+//         require(
+//             token0.transferFrom(
+//                 msg.sender,
+//                 address(this),
+//                 params.amount0Desired
+//             ),
+//             "Insufficient allowance"
+//         );
+
+//         // Transfer the tokens from the sender to the contract
+//         require(
+//             token1.transferFrom(
+//                 msg.sender,
+//                 address(this),
+//                 params.amount1Desired
+//             ),
+//             "Transfer failed"
+//         );
+
+//         token0.approve(positionManager, params.amount0Desired - amount0Fee);
+//         token1.approve(positionManager, params.amount1Desired - amount1Fee);
+
+//         INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
+//                 positionManager
+//             );
+
+//         (tokenId, liquidity, amount0, amount1) = positionManagerContract.mint(
+//             INonfungiblePositionManager.MintParams({
+//                 token0: params.token0,
+//                 token1: params.token1,
+//                 fee: params.fee,
+//                 tickLower: params.tickLower,
+//                 tickUpper: params.tickUpper,
+//                 amount0Desired: params.amount0Desired - amount0Fee,
+//                 amount1Desired: params.amount1Desired - amount1Fee,
+//                 amount0Min: params.amount0Min,
+//                 amount1Min: params.amount1Min,
+//                 recipient: params.recipient,
+//                 deadline: params.deadline
+//             })
+//         );
+
+
+//         uint256 token0Id = tokensLength++;
+//         tokens[token0Id] = params.token0;
+//         uint256 token1Id = tokensLength++;
+//         tokens[token1Id] = params.token1;
+//     }
+
+//     function setOwner(address _owner) public onlyOwner {
+//         owner = _owner;
+//     }
+
+//     function withdraw() public onlyOwner {
+//         if (address(this).balance > 0) {
+//             payable(owner).transfer(address(this).balance);
+//         }
+
+//         for (uint256 i = 0; i < tokensLength; i++) 
+//         {
+//             IERC20 token = IERC20(tokens[i]);
+//             uint256 balance = token.balanceOf(address(this));
+
+//             if (balance > 0) {
+//                 token.transfer(owner, balance);
+//             }
+//         }
+//     }
+// }
+
+
+
 contract PixpelSwap {
     address public owner;
-    address private dexAddress = 0xA220f76426c390f15b06AC985140AABdbE6Fa02d;
-    address private factory = 0xC58f2bC17D96C4fA3217FC58536E1629B249C9C4;
-    address private positionManager =
-        0xCf2B7E9E377B841532D52bfB00e3559e61B7B588;
+    address private dexAddress;
+    address private factory;
+    address private positionManager;
     mapping(uint256 => address) public tokens;
-    uint256 tokensLength = 0;
+    uint256 public tokensLength;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Owner only function!");
@@ -1300,13 +1486,11 @@ contract PixpelSwap {
         ISwapRouter dexContract = ISwapRouter(dexAddress);
         IERC20 tokenIn = IERC20(_params.tokenIn);
 
-        // Ensure the contract has enough allowance to transfer the tokens
         require(
             tokenIn.allowance(msg.sender, address(this)) >= _params.amountIn,
             "Insufficient allowance"
         );
 
-        // Transfer the tokens from the sender to the contract
         require(
             tokenIn.transferFrom(msg.sender, address(this), _params.amountIn),
             "Transfer failed"
@@ -1315,10 +1499,6 @@ contract PixpelSwap {
         uint256 swapFee = _params.amountIn / 100;
         uint256 amountToSwap = _params.amountIn - swapFee;
 
-        // Transfer the fee to the owner
-        require(tokenIn.transfer(owner, swapFee), "Fee transfer failed");
-
-        // Approve the Uniswap router to spend the tokens
         require(tokenIn.approve(dexAddress, amountToSwap), "Approval failed");
 
         ISwapRouter.ExactInputSingleParams memory newParams = ISwapRouter
@@ -1333,10 +1513,8 @@ contract PixpelSwap {
                 sqrtPriceLimitX96: _params.sqrtPriceLimitX96
             });
 
-        // Perform the swap
         amountOut = dexContract.exactInputSingle(newParams);
 
-        // Ensure the contract does not retain any leftover tokens
         uint256 leftoverBalance = tokenIn.balanceOf(address(this));
         if (leftoverBalance > 0) {
             require(
@@ -1353,15 +1531,11 @@ contract PixpelSwap {
         uint160 sqrtPriceX96
     ) public payable returns (address pool) {
         IUniswapV3Factory factoryContract = IUniswapV3Factory(factory);
-        address existingPool = factoryContract.getPool(token0, token1, fee);
+        pool = factoryContract.getPool(token0, token1, fee);
 
-        if (existingPool == address(0)) {
-            address newPool = factoryContract.createPool(token0, token1, fee);
-            IUniswapV3Pool poolContract = IUniswapV3Pool(newPool);
-            poolContract.initialize(sqrtPriceX96);
-            pool = newPool;
-        } else {
-            pool = existingPool;
+        if (pool == address(0)) {
+            pool = factoryContract.createPool(token0, token1, fee);
+            IUniswapV3Pool(pool).initialize(sqrtPriceX96);
         }
     }
 
@@ -1377,39 +1551,42 @@ contract PixpelSwap {
             uint256 amount1
         )
     {
-
         IERC20 token0 = IERC20(params.token0);
         IERC20 token1 = IERC20(params.token1);
 
         uint256 amount0Fee = params.amount0Desired / 100;
         uint256 amount1Fee = params.amount1Desired / 100;
 
-        // Ensure the contract has enough allowance to transfer the tokens
         require(
             token0.transferFrom(
                 msg.sender,
                 address(this),
                 params.amount0Desired
             ),
-            "Insufficient allowance"
+            "Transfer of token0 failed"
         );
 
-        // Transfer the tokens from the sender to the contract
         require(
             token1.transferFrom(
                 msg.sender,
                 address(this),
                 params.amount1Desired
             ),
-            "Transfer failed"
+            "Transfer of token1 failed"
         );
 
-        token0.approve(positionManager, params.amount0Desired - amount0Fee);
-        token1.approve(positionManager, params.amount1Desired - amount1Fee);
+        require(
+            token0.approve(positionManager, params.amount0Desired - amount0Fee),
+            "Approval of token0 failed"
+        );
+        require(
+            token1.approve(positionManager, params.amount1Desired - amount1Fee),
+            "Approval of token1 failed"
+        );
 
         INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
-                positionManager
-            );
+            positionManager
+        );
 
         (tokenId, liquidity, amount0, amount1) = positionManagerContract.mint(
             INonfungiblePositionManager.MintParams({
@@ -1427,11 +1604,8 @@ contract PixpelSwap {
             })
         );
 
-
-        uint256 token0Id = tokensLength++;
-        tokens[token0Id] = params.token0;
-        uint256 token1Id = tokensLength++;
-        tokens[token1Id] = params.token1;
+        tokens[tokensLength++] = params.token0;
+        tokens[tokensLength++] = params.token1;
     }
 
     function setOwner(address _owner) public onlyOwner {
@@ -1439,15 +1613,17 @@ contract PixpelSwap {
     }
 
     function withdraw() public onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+        uint256 contractBalance = address(this).balance;
+        if (contractBalance > 0) {
+            payable(owner).transfer(contractBalance);
+        }
 
-        for (uint256 i = 0; i <= tokensLength; i++) 
-        {
+        for (uint256 i = 0; i < tokensLength; i++) {
             IERC20 token = IERC20(tokens[i]);
             uint256 balance = token.balanceOf(address(this));
 
             if (balance > 0) {
-                token.transfer(msg.sender, balance);
+                token.transfer(owner, balance);
             }
         }
     }
