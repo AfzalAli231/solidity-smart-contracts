@@ -3,19 +3,19 @@
 pragma solidity ^0.8.20;
 pragma abicoder v2;
 
-/// @title Callback for IUniswapV3PoolActions#swap
-/// @notice Any contract that calls IUniswapV3PoolActions#swap must implement this interface
-interface IUniswapV3SwapCallback {
-    /// @notice Called to `msg.sender` after executing a swap via IUniswapV3Pool#swap.
+/// @title Callback for IPixpelSwapV3PoolActions#swap
+/// @notice Any contract that calls IPixpelSwapV3PoolActions#swap must implement this interface
+interface IPixpelSwapV3SwapCallback {
+    /// @notice Called to `msg.sender` after executing a swap via IPixpelSwapV3Pool#swap.
     /// @dev In the implementation you must pay the pool tokens owed for the swap.
-    /// The caller of this method must be checked to be a UniswapV3Pool deployed by the canonical UniswapV3Factory.
+    /// The caller of this method must be checked to be a PixpelSwapV3Pool deployed by the canonical PixpelSwapV3Factory.
     /// amount0Delta and amount1Delta can both be 0 if no tokens were swapped.
     /// @param amount0Delta The amount of token0 that was sent (negative) or must be received (positive) by the pool by
     /// the end of the swap. If positive, the callback must send that amount of token0 to the pool.
     /// @param amount1Delta The amount of token1 that was sent (negative) or must be received (positive) by the pool by
     /// the end of the swap. If positive, the callback must send that amount of token1 to the pool.
-    /// @param data Any data passed through by the caller via the IUniswapV3PoolActions#swap call
-    function uniswapV3SwapCallback(
+    /// @param data Any data passed through by the caller via the IPixpelSwapV3PoolActions#swap call
+    function PixpelSwapV3SwapCallback(
         int256 amount0Delta,
         int256 amount1Delta,
         bytes calldata data
@@ -110,8 +110,8 @@ interface IERC20 {
 }
 
 /// @title Router token swapping functionality
-/// @notice Functions for swapping tokens via Uniswap V3
-interface ISwapRouter is IUniswapV3SwapCallback {
+/// @notice Functions for swapping tokens via PixpelSwap V3
+interface ISwapRouter is IPixpelSwapV3SwapCallback {
     struct ExactInputSingleParams {
         address tokenIn;
         address tokenOut;
@@ -183,9 +183,9 @@ interface ISwapRouter is IUniswapV3SwapCallback {
         returns (uint256 amountIn);
 }
 
-/// @title The interface for the Uniswap V3 Factory
-/// @notice The Uniswap V3 Factory facilitates creation of Uniswap V3 pools and control over the protocol fees
-interface IUniswapV3Factory {
+/// @title The interface for the PixpelSwap V3 Factory
+/// @notice The PixpelSwap V3 Factory facilitates creation of PixpelSwap V3 pools and control over the protocol fees
+interface IPixpelSwapV3Factory {
     /// @notice Emitted when the owner of the factory is changed
     /// @param oldOwner The owner before the owner was changed
     /// @param newOwner The owner after the owner was changed
@@ -261,8 +261,8 @@ interface IUniswapV3Factory {
 
 /// @title Pool state that never changes
 /// @notice These parameters are fixed for a pool forever, i.e., the methods will always return the same values
-interface IUniswapV3PoolImmutables {
-    /// @notice The contract that deployed the pool, which must adhere to the IUniswapV3Factory interface
+interface IPixpelSwapV3PoolImmutables {
+    /// @notice The contract that deployed the pool, which must adhere to the IPixpelSwapV3Factory interface
     /// @return The contract address
     function factory() external view returns (address);
 
@@ -295,7 +295,7 @@ interface IUniswapV3PoolImmutables {
 /// @title Pool state that can change
 /// @notice These methods compose the pool's state, and can change with any frequency including multiple times
 /// per transaction
-interface IUniswapV3PoolState {
+interface IPixpelSwapV3PoolState {
     /// @notice The 0th storage slot in the pool stores many values, and is exposed as a single method to save gas
     /// when accessed externally.
     /// @return sqrtPriceX96 The current price of the pool as a sqrt(token1/token0) Q64.96 value
@@ -412,7 +412,7 @@ interface IUniswapV3PoolState {
 /// @title Pool state that is not stored
 /// @notice Contains view functions to provide information about the pool that is computed rather than stored on the
 /// blockchain. The functions here may have variable gas costs.
-interface IUniswapV3PoolDerivedState {
+interface IPixpelSwapV3PoolDerivedState {
     /// @notice Returns the cumulative tick and liquidity as of each timestamp `secondsAgo` from the current block timestamp
     /// @dev To get a time weighted average tick or liquidity-in-range, you must call this with two values, one representing
     /// the beginning of the period and another for the end of the period. E.g., to get the last hour time-weighted average tick,
@@ -452,14 +452,14 @@ interface IUniswapV3PoolDerivedState {
 
 /// @title Permissionless pool actions
 /// @notice Contains pool methods that can be called by anyone
-interface IUniswapV3PoolActions {
+interface IPixpelSwapV3PoolActions {
     /// @notice Sets the initial price for the pool
     /// @dev Price is represented as a sqrt(amountToken1/amountToken0) Q64.96 value
     /// @param sqrtPriceX96 the initial sqrt price of the pool as a Q64.96
     function initialize(uint160 sqrtPriceX96) external;
 
     /// @notice Adds liquidity for the given recipient/tickLower/tickUpper position
-    /// @dev The caller of this method receives a callback in the form of IUniswapV3MintCallback#uniswapV3MintCallback
+    /// @dev The caller of this method receives a callback in the form of IPixpelSwapV3MintCallback#PixpelSwapV3MintCallback
     /// in which they must pay any token0 or token1 owed for the liquidity. The amount of token0/token1 due depends
     /// on tickLower, tickUpper, the amount of liquidity, and the current price.
     /// @param recipient The address for which the liquidity will be created
@@ -512,7 +512,7 @@ interface IUniswapV3PoolActions {
     ) external returns (uint256 amount0, uint256 amount1);
 
     /// @notice Swap token0 for token1, or token1 for token0
-    /// @dev The caller of this method receives a callback in the form of IUniswapV3SwapCallback#uniswapV3SwapCallback
+    /// @dev The caller of this method receives a callback in the form of IPixpelSwapV3SwapCallback#PixpelSwapV3SwapCallback
     /// @param recipient The address to receive the output of the swap
     /// @param zeroForOne The direction of the swap, true for token0 to token1, false for token1 to token0
     /// @param amountSpecified The amount of the swap, which implicitly configures the swap as exact input (positive), or exact output (negative)
@@ -530,7 +530,7 @@ interface IUniswapV3PoolActions {
     ) external returns (int256 amount0, int256 amount1);
 
     /// @notice Receive token0 and/or token1 and pay it back, plus a fee, in the callback
-    /// @dev The caller of this method receives a callback in the form of IUniswapV3FlashCallback#uniswapV3FlashCallback
+    /// @dev The caller of this method receives a callback in the form of IPixpelSwapV3FlashCallback#PixpelSwapV3FlashCallback
     /// @dev Can be used to donate underlying tokens pro-rata to currently in-range liquidity providers by calling
     /// with 0 amount{0,1} and sending the donation amount(s) from the callback
     /// @param recipient The address which will receive the token0 and token1 amounts
@@ -555,7 +555,7 @@ interface IUniswapV3PoolActions {
 
 /// @title Permissioned pool actions
 /// @notice Contains pool methods that may only be called by the factory owner
-interface IUniswapV3PoolOwnerActions {
+interface IPixpelSwapV3PoolOwnerActions {
     /// @notice Set the denominator of the protocol's % share of the fees
     /// @param feeProtocol0 new protocol fee for token0 of the pool
     /// @param feeProtocol1 new protocol fee for token1 of the pool
@@ -576,7 +576,7 @@ interface IUniswapV3PoolOwnerActions {
 
 /// @title Events emitted by a pool
 /// @notice Contains all events emitted by the pool
-interface IUniswapV3PoolEvents {
+interface IPixpelSwapV3PoolEvents {
     /// @notice Emitted exactly once by a pool when #initialize is first called on the pool
     /// @dev Mint/Burn/Swap cannot be emitted by the pool before Initialize
     /// @param sqrtPriceX96 The initial sqrt price of the pool, as a Q64.96
@@ -703,17 +703,17 @@ interface IUniswapV3PoolEvents {
     );
 }
 
-/// @title The interface for a Uniswap V3 Pool
-/// @notice A Uniswap pool facilitates swapping and automated market making between any two assets that strictly conform
+/// @title The interface for a PixpelSwap V3 Pool
+/// @notice A PixpelSwap pool facilitates swapping and automated market making between any two assets that strictly conform
 /// to the ERC20 specification
 /// @dev The pool interface is broken up into many smaller pieces
-interface IUniswapV3Pool is
-    IUniswapV3PoolImmutables,
-    IUniswapV3PoolState,
-    IUniswapV3PoolDerivedState,
-    IUniswapV3PoolActions,
-    IUniswapV3PoolOwnerActions,
-    IUniswapV3PoolEvents
+interface IPixpelSwapV3Pool is
+    IPixpelSwapV3PoolImmutables,
+    IPixpelSwapV3PoolState,
+    IPixpelSwapV3PoolDerivedState,
+    IPixpelSwapV3PoolActions,
+    IPixpelSwapV3PoolOwnerActions,
+    IPixpelSwapV3PoolEvents
 {
 
 }
@@ -972,66 +972,11 @@ interface IPeripheryPayments {
 /// @title Immutable state
 /// @notice Functions that return immutable state of the router
 interface IPeripheryImmutableState {
-    /// @return Returns the address of the Uniswap V3 factory
+    /// @return Returns the address of the PixpelSwap V3 factory
     function factory() external view returns (address);
 
     /// @return Returns the address of WETH9
     function WETH9() external view returns (address);
-}
-
-/// @title Provides functions for deriving a pool address from the factory, tokens, and the fee
-library PoolAddress {
-    bytes32 internal constant POOL_INIT_CODE_HASH =
-        0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54;
-
-    /// @notice The identifying key of the pool
-    struct PoolKey {
-        address token0;
-        address token1;
-        uint24 fee;
-    }
-
-    /// @notice Returns PoolKey: the ordered tokens with the matched fee levels
-    /// @param tokenA The first token of a pool, unsorted
-    /// @param tokenB The second token of a pool, unsorted
-    /// @param fee The fee level of the pool
-    /// @return Poolkey The pool details with ordered token0 and token1 assignments
-    function getPoolKey(
-        address tokenA,
-        address tokenB,
-        uint24 fee
-    ) internal pure returns (PoolKey memory) {
-        if (tokenA > tokenB) (tokenA, tokenB) = (tokenB, tokenA);
-        return PoolKey({token0: tokenA, token1: tokenB, fee: fee});
-    }
-
-    /// @notice Deterministically computes the pool address given the factory and PoolKey
-    /// @param factory The Uniswap V3 factory contract address
-    /// @param key The PoolKey
-    /// @return pool The contract address of the V3 pool
-    function computeAddress(address factory, PoolKey memory key)
-        internal
-        pure
-        returns (address pool)
-    {
-        require(key.token0 < key.token1);
-        pool = address(
-            uint160(
-                uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            hex"ff",
-                            factory,
-                            keccak256(
-                                abi.encode(key.token0, key.token1, key.fee)
-                            ),
-                            POOL_INIT_CODE_HASH
-                        )
-                    )
-                )
-            )
-        );
-    }
 }
 
 /**
@@ -1082,7 +1027,7 @@ interface IERC721Enumerable is IERC721 {
 }
 
 /// @title Non-fungible token for positions
-/// @notice Wraps Uniswap V3 positions in a non-fungible token interface which allows for them to be transferred
+/// @notice Wraps PixpelSwap V3 positions in a non-fungible token interface which allows for them to be transferred
 /// and authorized.
 interface INonfungiblePositionManager is
     IPoolInitializer,
@@ -1267,200 +1212,12 @@ interface INonfungiblePositionManager is
     function burn(uint256 tokenId) external payable;
 }
 
-// contract PixpelSwap {
-//     address public owner;
-//     address private dexAddress = 0xA220f76426c390f15b06AC985140AABdbE6Fa02d;
-//     address private factory = 0xC58f2bC17D96C4fA3217FC58536E1629B249C9C4;
-//     address private positionManager =
-//         0xCf2B7E9E377B841532D52bfB00e3559e61B7B588;
-//     mapping(uint256 => address) public tokens;
-//     uint256 tokensLength = 0;
-
-//     modifier onlyOwner() {
-//         require(msg.sender == owner, "Owner only function!");
-//         _;
-//     }
-
-//     constructor(
-//         address _swapRouter,
-//         address _factory,
-//         address _positionManager
-//     ) {
-//         dexAddress = _swapRouter;
-//         owner = msg.sender;
-//         factory = _factory;
-//         positionManager = _positionManager;
-//     }
-
-//     function exactInput(ISwapRouter.ExactInputSingleParams memory _params)
-//         external
-//         payable
-//         returns (uint256 amountOut)
-//     {
-//         ISwapRouter dexContract = ISwapRouter(dexAddress);
-//         IERC20 tokenIn = IERC20(_params.tokenIn);
-
-//         // Ensure the contract has enough allowance to transfer the tokens
-//         require(
-//             tokenIn.allowance(msg.sender, address(this)) >= _params.amountIn,
-//             "Insufficient allowance"
-//         );
-
-//         // Transfer the tokens from the sender to the contract
-//         require(
-//             tokenIn.transferFrom(msg.sender, address(this), _params.amountIn),
-//             "Transfer failed"
-//         );
-
-//         uint256 swapFee = _params.amountIn / 100;
-//         uint256 amountToSwap = _params.amountIn - swapFee;
-
-//         // Approve the Uniswap router to spend the tokens
-//         require(tokenIn.approve(dexAddress, amountToSwap), "Approval failed");
-
-//         ISwapRouter.ExactInputSingleParams memory newParams = ISwapRouter
-//             .ExactInputSingleParams({
-//                 tokenIn: _params.tokenIn,
-//                 tokenOut: _params.tokenOut,
-//                 fee: _params.fee,
-//                 recipient: _params.recipient,
-//                 deadline: _params.deadline,
-//                 amountIn: amountToSwap,
-//                 amountOutMinimum: _params.amountOutMinimum,
-//                 sqrtPriceLimitX96: _params.sqrtPriceLimitX96
-//             });
-
-//         // Perform the swap
-//         amountOut = dexContract.exactInputSingle(newParams);
-
-//         // Ensure the contract does not retain any leftover tokens
-//         uint256 leftoverBalance = tokenIn.balanceOf(address(this));
-//         if (leftoverBalance > 0) {
-//             require(
-//                 tokenIn.transfer(msg.sender, leftoverBalance),
-//                 "Refund failed"
-//             );
-//         }
-//     }
-
-//     function createAndInitializePoolIfNecessary(
-//         address token0,
-//         address token1,
-//         uint24 fee,
-//         uint160 sqrtPriceX96
-//     ) public payable returns (address pool) {
-//         IUniswapV3Factory factoryContract = IUniswapV3Factory(factory);
-//         address existingPool = factoryContract.getPool(token0, token1, fee);
-
-//         if (existingPool == address(0)) {
-//             address newPool = factoryContract.createPool(token0, token1, fee);
-//             IUniswapV3Pool poolContract = IUniswapV3Pool(newPool);
-//             poolContract.initialize(sqrtPriceX96);
-//             pool = newPool;
-//         } else {
-//             pool = existingPool;
-//         }
-//     }
-
-//     function createLiquidity(
-//         INonfungiblePositionManager.MintParams memory params
-//     )
-//         public
-//         payable
-//         returns (
-//             uint256 tokenId,
-//             uint128 liquidity,
-//             uint256 amount0,
-//             uint256 amount1
-//         )
-//     {
-
-//         IERC20 token0 = IERC20(params.token0);
-//         IERC20 token1 = IERC20(params.token1);
-
-//         uint256 amount0Fee = params.amount0Desired / 100;
-//         uint256 amount1Fee = params.amount1Desired / 100;
-
-//         // Ensure the contract has enough allowance to transfer the tokens
-//         require(
-//             token0.transferFrom(
-//                 msg.sender,
-//                 address(this),
-//                 params.amount0Desired
-//             ),
-//             "Insufficient allowance"
-//         );
-
-//         // Transfer the tokens from the sender to the contract
-//         require(
-//             token1.transferFrom(
-//                 msg.sender,
-//                 address(this),
-//                 params.amount1Desired
-//             ),
-//             "Transfer failed"
-//         );
-
-//         token0.approve(positionManager, params.amount0Desired - amount0Fee);
-//         token1.approve(positionManager, params.amount1Desired - amount1Fee);
-
-//         INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
-//                 positionManager
-//             );
-
-//         (tokenId, liquidity, amount0, amount1) = positionManagerContract.mint(
-//             INonfungiblePositionManager.MintParams({
-//                 token0: params.token0,
-//                 token1: params.token1,
-//                 fee: params.fee,
-//                 tickLower: params.tickLower,
-//                 tickUpper: params.tickUpper,
-//                 amount0Desired: params.amount0Desired - amount0Fee,
-//                 amount1Desired: params.amount1Desired - amount1Fee,
-//                 amount0Min: params.amount0Min,
-//                 amount1Min: params.amount1Min,
-//                 recipient: params.recipient,
-//                 deadline: params.deadline
-//             })
-//         );
-
-
-//         uint256 token0Id = tokensLength++;
-//         tokens[token0Id] = params.token0;
-//         uint256 token1Id = tokensLength++;
-//         tokens[token1Id] = params.token1;
-//     }
-
-//     function setOwner(address _owner) public onlyOwner {
-//         owner = _owner;
-//     }
-
-//     function withdraw() public onlyOwner {
-//         if (address(this).balance > 0) {
-//             payable(owner).transfer(address(this).balance);
-//         }
-
-//         for (uint256 i = 0; i < tokensLength; i++) 
-//         {
-//             IERC20 token = IERC20(tokens[i]);
-//             uint256 balance = token.balanceOf(address(this));
-
-//             if (balance > 0) {
-//                 token.transfer(owner, balance);
-//             }
-//         }
-//     }
-// }
-
-
-
 contract PixpelSwap {
     address public owner;
     address private dexAddress;
     address private factory;
     address private positionManager;
     mapping(uint256 => address) public tokens;
-    uint256 public tokensLength;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Owner only function!");
@@ -1478,7 +1235,7 @@ contract PixpelSwap {
         positionManager = _positionManager;
     }
 
-    function exactInput(ISwapRouter.ExactInputSingleParams memory _params)
+    function exactInputSingle(ISwapRouter.ExactInputSingleParams memory _params)
         external
         payable
         returns (uint256 amountOut)
@@ -1530,13 +1287,123 @@ contract PixpelSwap {
         uint24 fee,
         uint160 sqrtPriceX96
     ) public payable returns (address pool) {
-        IUniswapV3Factory factoryContract = IUniswapV3Factory(factory);
+        IPixpelSwapV3Factory factoryContract = IPixpelSwapV3Factory(factory);
         pool = factoryContract.getPool(token0, token1, fee);
 
         if (pool == address(0)) {
             pool = factoryContract.createPool(token0, token1, fee);
-            IUniswapV3Pool(pool).initialize(sqrtPriceX96);
+            IPixpelSwapV3Pool(pool).initialize(sqrtPriceX96);
         }
+    }
+
+    function addLiquidity(
+        INonfungiblePositionManager.IncreaseLiquidityParams memory params,
+        address token0Address,
+        address token1Address
+    )
+        public
+        payable
+        returns (
+            uint128 liquidity,
+            uint256 amount0,
+            uint256 amount1
+        )
+    {
+        IERC20 token0 = IERC20(token0Address);
+        IERC20 token1 = IERC20(token1Address);
+
+        uint256 amount0Fee = params.amount0Desired / 100;
+        uint256 amount1Fee = params.amount1Desired / 100;
+
+        require(
+            token0.transferFrom(
+                msg.sender,
+                address(this),
+                params.amount0Desired
+            ),
+            "Transfer of token0 failed"
+        );
+
+        require(
+            token1.transferFrom(
+                msg.sender,
+                address(this),
+                params.amount1Desired
+            ),
+            "Transfer of token1 failed"
+        );
+
+        require(
+            token0.approve(positionManager, params.amount0Desired - amount0Fee),
+            "Approval of token0 failed"
+        );
+        require(
+            token1.approve(positionManager, params.amount1Desired - amount1Fee),
+            "Approval of token1 failed"
+        );
+
+        INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
+                positionManager
+            );
+
+        (liquidity, amount0, amount1) = positionManagerContract
+            .increaseLiquidity(
+                INonfungiblePositionManager.IncreaseLiquidityParams({
+                    tokenId: params.tokenId,
+                    amount0Desired: params.amount0Desired - amount0Fee,
+                    amount1Desired: params.amount1Desired - amount1Fee,
+                    amount0Min: params.amount0Min,
+                    amount1Min: params.amount1Min,
+                    deadline: params.deadline
+                })
+            );
+    }
+
+    function removeLiquidity(
+        INonfungiblePositionManager.DecreaseLiquidityParams memory params
+    ) public payable returns (uint256 amount0, uint256 amount1) {
+        INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
+                positionManager
+            );
+
+        (amount0, amount1) = positionManagerContract.decreaseLiquidity(
+            INonfungiblePositionManager.DecreaseLiquidityParams({
+                tokenId: params.tokenId,
+                liquidity: params.liquidity,
+                amount0Min: params.amount0Min,
+                amount1Min: params.amount1Min,
+                deadline: params.deadline
+            })
+        );
+    }
+
+    function removeAllLiquidity(
+        INonfungiblePositionManager.DecreaseLiquidityParams memory params,
+        INonfungiblePositionManager.CollectParams memory collectParams
+    ) public payable returns (uint256 amount0, uint256 amount1) {
+        INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
+                positionManager
+            );
+
+        (amount0, amount1) = positionManagerContract.decreaseLiquidity(
+            INonfungiblePositionManager.DecreaseLiquidityParams({
+                tokenId: params.tokenId,
+                liquidity: params.liquidity,
+                amount0Min: params.amount0Min,
+                amount1Min: params.amount1Min,
+                deadline: params.deadline
+            })
+        );
+
+
+        (amount0, amount1) = positionManagerContract.collect(
+            INonfungiblePositionManager.CollectParams({
+                tokenId: params.tokenId,
+                amount0Max: collectParams.amount0Max,
+                amount1Max: collectParams.amount1Max,
+                recipient: collectParams.recipient
+            })
+        );
     }
 
     function createLiquidity(
@@ -1585,8 +1452,8 @@ contract PixpelSwap {
         );
 
         INonfungiblePositionManager positionManagerContract = INonfungiblePositionManager(
-            positionManager
-        );
+                positionManager
+            );
 
         (tokenId, liquidity, amount0, amount1) = positionManagerContract.mint(
             INonfungiblePositionManager.MintParams({
@@ -1604,8 +1471,8 @@ contract PixpelSwap {
             })
         );
 
-        tokens[tokensLength++] = params.token0;
-        tokens[tokensLength++] = params.token1;
+        tokens[uint256(uint160(params.token0))] = params.token0;
+        tokens[uint256(uint160(params.token1))] = params.token1;
     }
 
     function setOwner(address _owner) public onlyOwner {
@@ -1617,14 +1484,14 @@ contract PixpelSwap {
         if (contractBalance > 0) {
             payable(owner).transfer(contractBalance);
         }
+    }
 
-        for (uint256 i = 0; i < tokensLength; i++) {
-            IERC20 token = IERC20(tokens[i]);
-            uint256 balance = token.balanceOf(address(this));
+    function withdrawTokens(address token) public onlyOwner {
+        IERC20 tokenContract = IERC20(tokens[uint256(uint160(token))]);
+        uint256 balance = tokenContract.balanceOf(address(this));
 
-            if (balance > 0) {
-                token.transfer(owner, balance);
-            }
+        if (balance > 0) {
+            tokenContract.transfer(owner, balance);
         }
     }
 }
