@@ -12,9 +12,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 contract ETHOnHarmony is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Pausable, Ownable, ERC721Burnable {
     uint256 private _nextTokenId;
 
-    constructor(address initialOwner)
-        ERC721("<Collection Name>", "<Collection Symbol>")
-        Ownable(initialOwner)
+    constructor(string memory collectionName, string memory collectionSymbol)
+        ERC721(collectionName, collectionSymbol)
+        Ownable(msg.sender)
     {}
 
     function pause() public onlyOwner {
